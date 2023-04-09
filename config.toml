@@ -1,0 +1,11 @@
+[general]
+criteria = "CR"
+CR_bound = 0.4
+CR2_bound = 0.05
+BF_bound = 10.0
+inp_class = "class_2"
+
+[greedy]
+GC2_scheme = "access"
+threshold = 0.5
+cr_con = false
