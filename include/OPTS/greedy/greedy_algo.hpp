@@ -1,8 +1,8 @@
 #ifndef GREEDY_ALGO_HPP_
 #define GREEDY_ALGO_HPP_
 
-#include "OPTS/greedy/schedule.hpp"
-#include "OPTS/greedy/time_schedule.hpp"
+#include "OPTS/greedy/schedule_data.hpp"
+#include "OPTS/greedy/time_diagram.hpp"
 
 namespace opts {
 namespace greedy {
@@ -12,9 +12,9 @@ namespace greedy {
  * 
  * @param schedule All specialized greedy algorithm input data. 
  * @param conf Greedy algorithm configuration.
- * @retval TimeSchedule Constructed schedule.
+ * @retval TimeDiagram Constructed schedule.
  */
-TimeSchedule construct_time_schedule(Schedule &schedule,
+TimeDiagram construct_time_schedule(ScheduleData &schedule,
                                      opts::greedy_config conf);
 
 /**
@@ -23,9 +23,9 @@ TimeSchedule construct_time_schedule(Schedule &schedule,
  * @param sched All specialized greedy algorithm input data. 
  * @param conf Greedy algorithm configuration.
  * @throws std::runtime_error If ann error occured during inserting a task. 
- * @retval TimeSchedule Constructed schedule.
+ * @retval TimeDiagram Constructed schedule.
  */
-TimeSchedule greedy_EDF_heuristic(Schedule &sched, opts::greedy_config conf);
+TimeDiagram greedy_EDF_heuristic(ScheduleData &sched, opts::greedy_config conf);
 
 } // namespace greedy
 } // namespace opts

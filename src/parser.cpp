@@ -10,7 +10,7 @@
 
 namespace opts {
 
-greedy::Schedule input_schedule_regular(std::string path,
+greedy::ScheduleData input_schedule_regular(std::string path,
                                         opts::input_class inp_class) {
     std::filesystem::path p(path);
     if (!std::filesystem::is_regular_file(p)) {
@@ -45,13 +45,13 @@ greedy::Schedule input_schedule_regular(std::string path,
             input >> tran_time(i, j);
         }
     }
-    std::vector<greedy::Schedule::Edge> edges;
+    std::vector<greedy::ScheduleData::Edge> edges;
     for (int i = 0; i < edge_num; ++i) {
         int a, b;
         input >> a >> b;
         edges.push_back({a, b});
     }
-    return greedy::Schedule(edges, task_time, tran_time);
+    return greedy::ScheduleData(edges, task_time, tran_time);
 }
 
 } // namespace opts

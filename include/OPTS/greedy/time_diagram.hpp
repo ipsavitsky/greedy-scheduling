@@ -1,7 +1,7 @@
 #ifndef TIME_SCHEDULE_HPP
 #define TIME_SCHEDULE_HPP
 
-#include "OPTS/greedy/schedule.hpp"
+#include "OPTS/greedy/schedule_data.hpp"
 #include "OPTS/options.hpp"
 #include "OPTS/output_class.hpp"
 
@@ -16,7 +16,7 @@ namespace greedy {
 /**
  * @brief Class representing a time diagram of a schedule
  */
-class TimeSchedule {
+class TimeDiagram {
   public:
     /**
      * @brief Type used to represent one processor
@@ -32,15 +32,15 @@ class TimeSchedule {
      * @brief internal mapping that is used for optimization to get processor
      * for the task by task id
      */
-    std::unordered_map<Schedule::Task, Schedule::Proc> fast_mapping;
+    std::unordered_map<ScheduleData::Task, ScheduleData::Proc> fast_mapping;
 
     /**
      * @deprecated
      * @brief Return the underlying processor array
      *
-     * @retval std::vector<TimeSchedule::proc_info>& Internal schedule object
+     * @retval std::vector<TimeDiagram::proc_info>& Internal schedule object
      */
-    std::vector<TimeSchedule::proc_info> &get_schedule();
+    std::vector<TimeDiagram::proc_info> &get_schedule();
 
   private:
     /**
@@ -72,7 +72,7 @@ class TimeSchedule {
     /**
      * @brief reference to the schedule as a class of input data and parameters
      */
-    const Schedule &sched;
+    const ScheduleData &sched;
 
     /**
      * @brief Calculate the time to which the task can be added.
@@ -87,7 +87,7 @@ class TimeSchedule {
      * @param proc Processor for the task
      * @return std::size_t Time the task can start on a processor
      */
-    std::size_t find_place(Schedule::Task task, Schedule::Proc proc);
+    std::size_t find_place(ScheduleData::Task task, ScheduleData::Proc proc);
 
     /**
      * @brief Test if a task can be added to the schedule.
@@ -100,7 +100,7 @@ class TimeSchedule {
      * @param proc Processor for obtaining trial scheduling data.
      * @retval precalc_info All needed trial scheduling data to place task.
      */
-    precalc_info test_add_task(Schedule::Task task, Schedule::Proc proc);
+    precalc_info test_add_task(ScheduleData::Task task, ScheduleData::Proc proc);
 
     /**
      * @brief Remove task from schedule.
@@ -110,7 +110,7 @@ class TimeSchedule {
      *
      * @param task Task to be removed from the schedule
      */
-    void remove_task(Schedule::Task task);
+    void remove_task(ScheduleData::Task task);
 
     /**
      * @brief Place the task on a processor on a predetermined
@@ -120,7 +120,7 @@ class TimeSchedule {
      * @param proc Processor for the task
      * @param starting_place Time that the task starts on the processor
      */
-    void add_task_internal(Schedule::Task task, Schedule::Proc proc,
+    void add_task_internal(ScheduleData::Task task, ScheduleData::Proc proc,
                            std::size_t starting_place);
 
   public:
@@ -128,9 +128,9 @@ class TimeSchedule {
      * @param schedule Input data for schedule construction.
      * @param proc_num Number of processors for the schedule.
      */
-    TimeSchedule(const Schedule &schedule, std::size_t proc_num);
+    TimeDiagram(const ScheduleData &schedule, std::size_t proc_num);
 
-    TimeSchedule(const TimeSchedule &other) = default;
+    TimeDiagram(const TimeDiagram &other) = default;
 
     /**
      * @brief Calculate schedule duration.
@@ -143,7 +143,7 @@ class TimeSchedule {
      * @param task Task to add to schedule
      * @param proc Processor to add task on
      */
-    void add_task(Schedule::Task task, Schedule::Proc proc);
+    void add_task(ScheduleData::Task task, ScheduleData::Proc proc);
 
     /**
      * @brief Choose processor for a task based only on execution time.
@@ -151,9 +151,9 @@ class TimeSchedule {
      * This routine only takes into account task completion time.
      *
      * @param task Task to determine optimal processor for
-     * @retval Schedule::Proc Processor to assign task to.
+     * @retval ScheduleData::Proc Processor to assign task to.
      */
-    Schedule::Proc GC2(Schedule::Task task);
+    ScheduleData::Proc GC2(ScheduleData::Task task);
 
     /**
      * @brief Choose processor for a task based on weighted sum for BF.
@@ -163,9 +163,9 @@ class TimeSchedule {
      *
      * @param task Task to determine optimal processor for
      * @param C1,C2 Coefficients of the weighted sum
-     * @retval Schedule::Proc Processor to assign task to.
+     * @retval ScheduleData::Proc Processor to assign task to.
      */
-    Schedule::Proc GC2_BF_simple(Schedule::Task task, double C1, double C2);
+    ScheduleData::Proc GC2_BF_simple(ScheduleData::Task task, double C1, double C2);
 
     /**
      * @brief Choose processor for a task based on weighted sum for CR.
@@ -176,9 +176,9 @@ class TimeSchedule {
      *
      * @param task Task to determine optimal processor for
      * @param C1, C2, C3 Coefficients of the weighted sum
-     * @retval Schedule::Proc Processor to assign task to.
+     * @retval ScheduleData::Proc Processor to assign task to.
      */
-    Schedule::Proc GC2_CR_simple(Schedule::Task task, double C1, double C2,
+    ScheduleData::Proc GC2_CR_simple(ScheduleData::Task task, double C1, double C2,
                                    double C3);
 
     /**
@@ -191,9 +191,9 @@ class TimeSchedule {
      *
      * @param task Task to determine optimal processor for
      * @param n Threshold parameter of the tolerance scheme
-     * @retval Schedule::Proc Processor to assign task to.
+     * @retval ScheduleData::Proc Processor to assign task to.
      */
-    Schedule::Proc GC2_BF_access(Schedule::Task task, double n);
+    ScheduleData::Proc GC2_BF_access(ScheduleData::Task task, double n);
 
     /**
      * @brief Choose processor based on a variable tolerance scheme with CR
@@ -207,9 +207,9 @@ class TimeSchedule {
      *
      * @param task Task to determine optimal processor for
      * @param n Threshold parameter of the tolerance scheme
-     * @retval Schedule::Proc Processor to assign task to.
+     * @retval ScheduleData::Proc Processor to assign task to.
      */
-    Schedule::Proc GC2_CR_access(Schedule::Task task, double n);
+    ScheduleData::Proc GC2_CR_access(ScheduleData::Task task, double n);
 
     /**
      * @brief Calculate `BF` of current schedule

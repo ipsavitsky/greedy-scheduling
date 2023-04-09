@@ -2,7 +2,7 @@
 #define HUAWEI_PARSER_HPP
 
 #include "OPTS/options.hpp"
-#include "OPTS/greedy/schedule.hpp"
+#include "OPTS/greedy/schedule_data.hpp"
 
 #include <string>
 
@@ -25,9 +25,9 @@ namespace opts {
  * @throws std::runtime_error Thrown if a non-file is passed.
  * @param path Path to file
  * @param inp_class Class of input data.
- * @retval greedy::Schedule Generalised input data.
+ * @retval greedy::ScheduleData Generalised input data.
  */
-greedy::Schedule input_schedule_regular(std::string path,
+greedy::ScheduleData input_schedule_regular(std::string path,
                                   opts::input_class inp_class);
 
 } // namespace opts

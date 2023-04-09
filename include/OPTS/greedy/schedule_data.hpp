@@ -16,7 +16,7 @@ namespace greedy {
  * Contains a task graph, \f$C\f$ and \f$D\f$ matrices, which are task execution
  * time and processor communication matrices.
  */
-class Schedule {
+class ScheduleData {
   public:
     /**
      * @brief Internal type used to represent data in a node
@@ -123,13 +123,13 @@ class Schedule {
     Graph graph;
 
     /**
-     * @brief Construct a new Schedule object
+     * @brief Construct a new ScheduleData object
      *
      * @param edge_vec Vector of all edges in a graph
      * @param task_times `task_time` matrix (\f$ C \f$)
      * @param tran_times `tran_time` matrix (\f$ D \f$)
      */
-    Schedule(std::vector<Edge> &edge_vec,
+    ScheduleData(std::vector<Edge> &edge_vec,
              boost::numeric::ublas::matrix<std::size_t> task_times,
              boost::numeric::ublas::matrix<int> tran_times);
 
@@ -137,9 +137,9 @@ class Schedule {
      * @brief Assign one input data object to another.
      *
      * @param other The other input data object.
-     * @retval Schedule& Other input data object after the assgnment.
+     * @retval ScheduleData& Other input data object after the assgnment.
      */
-    Schedule &operator=(const Schedule &other) = default;
+    ScheduleData &operator=(const ScheduleData &other) = default;
 
     /**
      * @brief Print graph to stdout.
@@ -223,7 +223,7 @@ class Schedule {
      * `out_degree`
      *
      * @param D Set of tasks that are ready to be added to the schedule
-     * @retval Schedule::Task Chosen next task.
+     * @retval ScheduleData::Task Chosen next task.
      */
     Task GC1(std::set<Task> &D);
 
@@ -235,7 +235,7 @@ class Schedule {
      * `out_degree`
      *
      * @param D Set of tasks that are ready to be added to the schedule
-     * @retval Schedule::Task Chosen next task.
+     * @retval ScheduleData::Task Chosen next task.
      */
     Task GC1_for_CR_con(std::set<Task> &D);
 

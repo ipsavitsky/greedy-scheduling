@@ -11,9 +11,9 @@
 namespace opts {
 namespace greedy {
 
-TimeSchedule construct_time_schedule(Schedule &schedule,
+TimeDiagram construct_time_schedule(ScheduleData &schedule,
                                      opts::greedy_config conf) {
-    TimeSchedule time_schedule(schedule, schedule.proc_num);
+    TimeDiagram time_schedule(schedule, schedule.proc_num);
 
     auto D = schedule.get_top_vertices();
 
@@ -86,7 +86,7 @@ TimeSchedule construct_time_schedule(Schedule &schedule,
                 }
 
                 auto proc_graph =
-                    Schedule::Graph(edge_vec.begin(), edge_vec.end(), vertices);
+                    ScheduleData::Graph(edge_vec.begin(), edge_vec.end(), vertices);
                 std::vector<std::size_t> curr_task_weights(vertices);
                 for (size_t i = 0; i < vertices; ++i) {
                     curr_task_weights[i] = 1;
@@ -130,7 +130,7 @@ TimeSchedule construct_time_schedule(Schedule &schedule,
 
     BOOST_LOG_NAMED_SCOPE("algo");
     while (!D.empty()) {
-        Schedule::Task chosen_task;
+        ScheduleData::Task chosen_task;
         if (conf.cr_con &&
             (time_schedule.calculate_CR() >= 0.75 * conf.CR_bound)) {
             chosen_task = schedule.GC1_for_CR_con(D);
@@ -138,7 +138,7 @@ TimeSchedule construct_time_schedule(Schedule &schedule,
             chosen_task = schedule.GC1(D);
         }
         LOG_TRACE << "GC1 chosen " << chosen_task;
-        Schedule::Proc chosen_proc;
+        ScheduleData::Proc chosen_proc;
         switch (conf.criteria) {
         case extra_criteria::NO:
             chosen_proc = time_schedule.GC2(chosen_task);
@@ -188,12 +188,12 @@ TimeSchedule construct_time_schedule(Schedule &schedule,
     return time_schedule;
 }
 
-TimeSchedule greedy_EDF_heuristic(Schedule &sched, opts::greedy_config conf) {
+TimeDiagram greedy_EDF_heuristic(ScheduleData &sched, opts::greedy_config conf) {
     BOOST_LOG_NAMED_SCOPE("greedy_EDF_heuristic");
     std::size_t right_border = 0;
-    std::unordered_set<Schedule::Task> leaf_nodes;
+    std::unordered_set<ScheduleData::Task> leaf_nodes;
 
-    Schedule::Graph &gr = sched.get_graph();
+    ScheduleData::Graph &gr = sched.get_graph();
 
     // boost::write_graphviz(std::cout, gr);
 
@@ -264,7 +264,7 @@ TimeSchedule greedy_EDF_heuristic(Schedule &sched, opts::greedy_config conf) {
                 }
 
                 auto proc_graph =
-                    Schedule::Graph(edge_vec.begin(), edge_vec.end(), vertices);
+                    ScheduleData::Graph(edge_vec.begin(), edge_vec.end(), vertices);
                 std::vector<std::size_t> curr_task_weights(vertices);
                 for (size_t i = 0; i < vertices; ++i) {
                     curr_task_weights[i] = 1;
@@ -311,7 +311,7 @@ TimeSchedule greedy_EDF_heuristic(Schedule &sched, opts::greedy_config conf) {
     LOG_INFO << "Generated partitioning!";
 
     // https://stackoverflow.com/questions/63041285/boost-graph-algorithm-to-traverse-a-tree-down-to-single-leaf
-    for (Schedule::Task cur = 0; cur < sched.task_num; ++cur) {
+    for (ScheduleData::Task cur = 0; cur < sched.task_num; ++cur) {
         if (0 == boost::out_degree(cur, gr)) {
             auto [_, successful] = leaf_nodes.insert(cur);
             if (!successful) {
@@ -324,14 +324,14 @@ TimeSchedule greedy_EDF_heuristic(Schedule &sched, opts::greedy_config conf) {
     LOG_INFO << "Got first leaf nodes!";
 
     while (!leaf_nodes.empty()) {
-        std::unordered_set<Schedule::Task> new_set_of_leaves(leaf_nodes);
-        for (const Schedule::Task leaf : leaf_nodes) {
+        std::unordered_set<ScheduleData::Task> new_set_of_leaves(leaf_nodes);
+        for (const ScheduleData::Task leaf : leaf_nodes) {
             new_set_of_leaves.erase(leaf);
             for (auto [from_it, to_it] = boost::in_edges(leaf, gr);
                  from_it != to_it; ++from_it) {
                 // LOG_INFO << "goung through leaves of " << leaf
                 //          << "; cur_edge = " << *from_it;
-                Schedule::Task task = boost::source(*from_it, gr);
+                ScheduleData::Task task = boost::source(*from_it, gr);
                 bool has_real_children = false;
                 for (auto [frst_chld, lst_chld] = boost::out_edges(task, gr);
                      frst_chld != lst_chld; ++frst_chld) {
@@ -353,8 +353,8 @@ TimeSchedule greedy_EDF_heuristic(Schedule &sched, opts::greedy_config conf) {
         leaf_nodes = std::move(new_set_of_leaves);
         // LOG_INFO << "leaf_nodes.size() = " << leaf_nodes.size();
 
-        for (const Schedule::Task leaf : leaf_nodes) {
-            std::vector<Schedule::Task> targets;
+        for (const ScheduleData::Task leaf : leaf_nodes) {
+            std::vector<ScheduleData::Task> targets;
 
             for (auto [frst_deadline, last_deadline] =
                      boost::out_edges(leaf, gr);
@@ -362,9 +362,9 @@ TimeSchedule greedy_EDF_heuristic(Schedule &sched, opts::greedy_config conf) {
                 targets.push_back(boost::target(*frst_deadline, gr));
             }
 
-            Schedule::Task earliest_deadline = *std::min_element(
+            ScheduleData::Task earliest_deadline = *std::min_element(
                 targets.begin(), targets.end(),
-                [&gr](const Schedule::Task &a, const Schedule::Task &b) {
+                [&gr](const ScheduleData::Task &a, const ScheduleData::Task &b) {
                     return gr[a].deadline < gr[b].deadline;
                 });
 
@@ -388,13 +388,13 @@ TimeSchedule greedy_EDF_heuristic(Schedule &sched, opts::greedy_config conf) {
 
     LOG_INFO << "All deadlines set up";
 
-    TimeSchedule res(sched, sched.proc_num);
+    TimeDiagram res(sched, sched.proc_num);
 
-    std::vector<Schedule::Task> order(sched.task_num);
+    std::vector<ScheduleData::Task> order(sched.task_num);
     std::iota(order.begin(), order.end(), 0);
 
     std::sort(order.begin(), order.end(),
-              [&gr](const Schedule::Task &fr, const Schedule::Task &scnd) {
+              [&gr](const ScheduleData::Task &fr, const ScheduleData::Task &scnd) {
                   return gr[fr].deadline < gr[scnd].deadline;
               });
 
@@ -404,8 +404,8 @@ TimeSchedule greedy_EDF_heuristic(Schedule &sched, opts::greedy_config conf) {
     std::size_t it_counter_max = sched.task_num;
     double last_ratio = it_counter / (double)it_counter_max;
 
-    for (const Schedule::Task &cur : order) {
-        Schedule::Proc chosen_proc;
+    for (const ScheduleData::Task &cur : order) {
+        ScheduleData::Proc chosen_proc;
 
         switch (conf.criteria) {
         case extra_criteria::CR:

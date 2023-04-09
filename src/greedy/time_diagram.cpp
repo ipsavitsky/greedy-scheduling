@@ -1,4 +1,4 @@
-#include "OPTS/greedy/time_schedule.hpp"
+#include "OPTS/greedy/time_diagram.hpp"
 #include "OPTS/logger_config.hpp"
 
 #include <algorithm>
@@ -11,12 +11,12 @@
 namespace opts {
 namespace greedy {
 
-TimeSchedule::TimeSchedule(const Schedule &schedule, std::size_t proc_num)
+TimeDiagram::TimeDiagram(const ScheduleData &schedule, std::size_t proc_num)
     : sched(schedule) {
     proc_array.resize(proc_num);
 }
 
-int TimeSchedule::get_time() const {
+int TimeDiagram::get_time() const {
     BOOST_LOG_NAMED_SCOPE("get_time");
     LOG_TRACE << "calculating time";
     LOG_TRACE << "array size: " << proc_array.size();
@@ -29,8 +29,8 @@ int TimeSchedule::get_time() const {
     return *std::max_element(proc_times.begin(), proc_times.end());
 }
 
-std::size_t TimeSchedule::find_place(greedy::Schedule::Task task,
-                                     greedy::Schedule::Proc proc) {
+std::size_t TimeDiagram::find_place(greedy::ScheduleData::Task task,
+                                     greedy::ScheduleData::Proc proc) {
     BOOST_LOG_NAMED_SCOPE("find_place");
     std::vector<std::size_t> times;
     for (auto it = sched.get_in_edges(task); it.first != it.second;
@@ -87,9 +87,9 @@ std::size_t TimeSchedule::find_place(greedy::Schedule::Task task,
     return cur->finish;
 }
 
-TimeSchedule::precalc_info
-TimeSchedule::test_add_task(greedy::Schedule::Task task,
-                            greedy::Schedule::Proc proc) {
+TimeDiagram::precalc_info
+TimeDiagram::test_add_task(greedy::ScheduleData::Task task,
+                            greedy::ScheduleData::Proc proc) {
     BOOST_LOG_NAMED_SCOPE("test_add_task");
     auto expected_start = find_place(task, proc);
     add_task_internal(task, proc, expected_start);
@@ -105,8 +105,8 @@ TimeSchedule::test_add_task(greedy::Schedule::Task task,
                 expected_start + sched.get_task_time(proc, task)};
 }
 
-void TimeSchedule::add_task_internal(greedy::Schedule::Task task,
-                                     greedy::Schedule::Proc proc,
+void TimeDiagram::add_task_internal(greedy::ScheduleData::Task task,
+                                     greedy::ScheduleData::Proc proc,
                                      std::size_t starting_place) {
     BOOST_LOG_NAMED_SCOPE("add_task_internal");
     Output_data::PlacedTask placed_task{
@@ -133,8 +133,8 @@ void TimeSchedule::add_task_internal(greedy::Schedule::Task task,
     }
 }
 
-void TimeSchedule::add_task(greedy::Schedule::Task task,
-                            greedy::Schedule::Proc proc) {
+void TimeDiagram::add_task(greedy::ScheduleData::Task task,
+                            greedy::ScheduleData::Proc proc) {
     BOOST_LOG_NAMED_SCOPE("add_task");
     auto x = find_place(task, proc);
     LOG_TRACE << "adding: " << task << " on time: " << x << " on process "
@@ -142,7 +142,7 @@ void TimeSchedule::add_task(greedy::Schedule::Task task,
     add_task_internal(task, proc, x);
 }
 
-void TimeSchedule::remove_task(greedy::Schedule::Task task) {
+void TimeDiagram::remove_task(greedy::ScheduleData::Task task) {
     BOOST_LOG_NAMED_SCOPE("remove_task");
     auto &proc = proc_array.at(fast_mapping[task]);
     std::erase_if(proc, [task](const Output_data::PlacedTask &t) {
@@ -161,15 +161,15 @@ void TimeSchedule::remove_task(greedy::Schedule::Task task) {
     fast_mapping.erase(task);
 }
 
-greedy::Schedule::Proc TimeSchedule::GC2(greedy::Schedule::Task task) {
-    std::vector<std::pair<greedy::Schedule::Proc, std::size_t>> times;
+greedy::ScheduleData::Proc TimeDiagram::GC2(greedy::ScheduleData::Task task) {
+    std::vector<std::pair<greedy::ScheduleData::Proc, std::size_t>> times;
     std::transform(boost::counting_iterator<std::size_t>(0),
                    boost::counting_iterator<std::size_t>(proc_array.size()),
                    std::back_inserter(times), [&](std::size_t i) {
                        return std::make_pair(
                            i, test_add_task(task, i).expected_finish);
                    });
-    greedy::Schedule::Proc best_proc =
+    greedy::ScheduleData::Proc best_proc =
         std::min_element(
             times.begin(), times.end(),
             [](const auto &a, const auto &b) { return a.second < b.second; })
@@ -177,7 +177,7 @@ greedy::Schedule::Proc TimeSchedule::GC2(greedy::Schedule::Task task) {
     return best_proc;
 }
 
-greedy::Schedule::Proc TimeSchedule::GC2_CR_simple(greedy::Schedule::Task task,
+greedy::ScheduleData::Proc TimeDiagram::GC2_CR_simple(greedy::ScheduleData::Task task,
                                                    double C1, double C2,
                                                    double C3) {
     std::vector<precalc_info> precalc;
@@ -197,7 +197,7 @@ greedy::Schedule::Proc TimeSchedule::GC2_CR_simple(greedy::Schedule::Task task,
                    [max_time](const precalc_info &cur_elem) {
                        return cur_elem.expected_finish / (double)max_time;
                    });
-    std::vector<std::pair<greedy::Schedule::Proc, double>> times;
+    std::vector<std::pair<greedy::ScheduleData::Proc, double>> times;
     auto tied_it = boost::combine(precalc, normalized_times);
     std::transform(
         tied_it.begin(), tied_it.end(),
@@ -215,7 +215,7 @@ greedy::Schedule::Proc TimeSchedule::GC2_CR_simple(greedy::Schedule::Task task,
         ->first;
 }
 
-greedy::Schedule::Proc TimeSchedule::GC2_BF_simple(greedy::Schedule::Task task,
+greedy::ScheduleData::Proc TimeDiagram::GC2_BF_simple(greedy::ScheduleData::Task task,
                                                    double C1, double C2) {
     std::vector<precalc_info> precalc;
     std::transform(boost::counting_iterator<std::size_t>(0),
@@ -234,7 +234,7 @@ greedy::Schedule::Proc TimeSchedule::GC2_BF_simple(greedy::Schedule::Task task,
                    [max_time](const precalc_info &cur_elem) {
                        return cur_elem.expected_finish / (double)max_time;
                    });
-    std::vector<std::pair<greedy::Schedule::Proc, double>> times;
+    std::vector<std::pair<greedy::ScheduleData::Proc, double>> times;
     auto tied_it = boost::combine(precalc, normalized_times);
     std::transform(
         tied_it.begin(), tied_it.end(),
@@ -251,10 +251,10 @@ greedy::Schedule::Proc TimeSchedule::GC2_BF_simple(greedy::Schedule::Task task,
         ->first;
 }
 
-greedy::Schedule::Proc TimeSchedule::GC2_BF_access(greedy::Schedule::Task task,
+greedy::ScheduleData::Proc TimeDiagram::GC2_BF_access(greedy::ScheduleData::Task task,
                                                    double n) {
     BOOST_LOG_NAMED_SCOPE("GC2_BF_access");
-    using precalc_table = std::pair<greedy::Schedule::Proc, precalc_info>;
+    using precalc_table = std::pair<greedy::ScheduleData::Proc, precalc_info>;
     std::vector<precalc_table> task_table;
     std::transform(boost::counting_iterator<std::size_t>(0),
                    boost::counting_iterator<std::size_t>(proc_array.size()),
@@ -295,7 +295,7 @@ greedy::Schedule::Proc TimeSchedule::GC2_BF_access(greedy::Schedule::Task task,
         ->first;
 }
 
-greedy::Schedule::Proc TimeSchedule::GC2_CR_access(greedy::Schedule::Task task,
+greedy::ScheduleData::Proc TimeDiagram::GC2_CR_access(greedy::ScheduleData::Task task,
                                                    double n) {
     BOOST_LOG_NAMED_SCOPE("GC2_CR_access");
     using precalc_table = std::pair<std::size_t, precalc_info>;
@@ -343,7 +343,7 @@ greedy::Schedule::Proc TimeSchedule::GC2_CR_access(greedy::Schedule::Task task,
         ->first;
 }
 
-double TimeSchedule::calculate_BF() const {
+double TimeDiagram::calculate_BF() const {
     BOOST_LOG_NAMED_SCOPE("calculate_BF");
     auto max_tasks =
         std::max_element(proc_array.begin(), proc_array.end(),
@@ -361,20 +361,20 @@ double TimeSchedule::calculate_BF() const {
     return std::ceil(BF);
 }
 
-double TimeSchedule::calculate_CR() const {
+double TimeDiagram::calculate_CR() const {
     BOOST_LOG_NAMED_SCOPE("calculate_CR");
     LOG_TRACE << amount_of_transitions << " "
               << boost::num_edges(sched.get_graph());
     return amount_of_transitions / (double)boost::num_edges(sched.get_graph());
 }
 
-double TimeSchedule::calculate_CR2() const {
+double TimeDiagram::calculate_CR2() const {
     BOOST_LOG_NAMED_SCOPE("calculate_CR2");
     return amount_of_indirect_transitions /
            (double)boost::num_edges(sched.get_graph());
 }
 
-void TimeSchedule::print_schedule() const {
+void TimeDiagram::print_schedule() const {
     BOOST_LOG_NAMED_SCOPE("print_schedule");
     LOG_TRACE << "printing schedule";
     std::stringstream ss;
@@ -388,7 +388,7 @@ void TimeSchedule::print_schedule() const {
     LOG_TRACE << ss.str();
 }
 
-double TimeSchedule::calculate_downtime() const {
+double TimeDiagram::calculate_downtime() const {
     BOOST_LOG_NAMED_SCOPE("calculate_downtime");
     double relative_downtime = 0;
     for (auto proc : proc_array) {
@@ -407,11 +407,11 @@ double TimeSchedule::calculate_downtime() const {
     return relative_downtime / proc_array.size();
 }
 
-std::vector<TimeSchedule::proc_info> &TimeSchedule::get_schedule() {
+std::vector<TimeDiagram::proc_info> &TimeDiagram::get_schedule() {
     return proc_array;
 }
 
-Output_data TimeSchedule::extract_data(const opts::greedy_config &conf) const {
+Output_data TimeDiagram::extract_data(const opts::greedy_config &conf) const {
     Output_data res;
     res.BF = calculate_BF();
     res.CR = calculate_CR();

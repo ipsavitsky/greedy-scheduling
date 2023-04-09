@@ -1,8 +1,8 @@
 #ifndef GRAPH_PART_HPP_
 #define GRAPH_PART_HPP_
 
-#include "OPTS/greedy/schedule.hpp"
-#include "OPTS/greedy/time_schedule.hpp"
+#include "OPTS/greedy/schedule_data.hpp"
+#include "OPTS/greedy/time_diagram.hpp"
 #include "metis.h"
 
 namespace opts {
@@ -30,13 +30,13 @@ std::vector<std::size_t> get_partition(std::string filename,
                                        std::size_t num_proc);
 
 /**
- * @brief Convert an greedy::Schedule::Graph to a CSR understandable by
+ * @brief Convert an greedy::ScheduleData::Graph to a CSR understandable by
  * partitioning algorithms
  *
  * @param graph Graph to be converted
  * @retval CSR Generated CSR.
  */
-CSR adjcy2CSR(const greedy::Schedule::Graph &graph);
+CSR adjcy2CSR(const greedy::ScheduleData::Graph &graph);
 
 /**
  * @brief Graph partitioning algorithm.
@@ -69,7 +69,7 @@ part_graph(CSR &csr, std::size_t num_parts, std::uint64_t ufactor,
  */
 std::vector<std::size_t>
 local_partition_optimization(const std::vector<std::size_t> &partition,
-                             const greedy::Schedule &data,
+                             const greedy::ScheduleData &data,
                              const opts::base_config &conf);
 
 } // namespace opts

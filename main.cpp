@@ -91,9 +91,9 @@ int main(int argc, char *argv[]) {
         boost::timer::cpu_timer timer;
         opts::greedy_config conf =
             opts::parse_greedy_config(vm["conf"].as<std::string>());
-        opts::greedy::Schedule schedule = opts::input_schedule_regular(
+        opts::greedy::ScheduleData schedule = opts::input_schedule_regular(
             vm["input"].as<std::string>(), conf._class);
-        opts::greedy::TimeSchedule time_schedule =
+        opts::greedy::TimeDiagram time_schedule =
             opts::greedy::construct_time_schedule(schedule, conf);
 
         auto algo_time = timer.elapsed();
@@ -110,9 +110,9 @@ int main(int argc, char *argv[]) {
 
         opts::greedy_config conf =
             opts::parse_greedy_config(vm["conf"].as<std::string>());
-        opts::greedy::Schedule schedule = opts::input_schedule_regular(
+        opts::greedy::ScheduleData schedule = opts::input_schedule_regular(
             vm["input"].as<std::string>(), conf._class);
-        opts::greedy::TimeSchedule time_schedule =
+        opts::greedy::TimeDiagram time_schedule =
             opts::greedy::greedy_EDF_heuristic(schedule, conf);
 
         auto algo_time = timer.elapsed();

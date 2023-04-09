@@ -2,7 +2,7 @@
 #define OUTPUT_CLASS_HPP_
 
 #include "options.hpp"
-#include "greedy/schedule.hpp"
+#include "greedy/schedule_data.hpp"
 #include <list>
 #include <string>
 
@@ -72,7 +72,7 @@ class Output_data {
      *
      */
     struct PlacedTask {
-        greedy::Schedule::Task
+        greedy::ScheduleData::Task
             task_no;        ///< number of task in order that they
                             ///< are numerated in the graph.
         std::size_t start;  ///< task execution start time

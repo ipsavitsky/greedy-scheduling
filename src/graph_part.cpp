@@ -19,7 +19,7 @@ namespace opts {
  * @retval double Partition `BF` value
  */
 double calculate_partitioned_BF(const std::vector<std::size_t> &partitioning,
-                                const greedy::Schedule &s) {
+                                const greedy::ScheduleData &s) {
     BOOST_LOG_NAMED_SCOPE("calculate_BF");
     std::vector<std::size_t> am_of_tasks_on_proc(s.proc_num);
     std::fill(am_of_tasks_on_proc.begin(), am_of_tasks_on_proc.end(), 0);
@@ -44,7 +44,7 @@ double calculate_partitioned_BF(const std::vector<std::size_t> &partitioning,
  * @retval double Partition `CR` value
  */
 double calculate_partitioned_CR(const std::vector<std::size_t> &partitioning,
-                                const greedy::Schedule &s) {
+                                const greedy::ScheduleData &s) {
     BOOST_LOG_NAMED_SCOPE("calculate_CR")
     auto [cur, end] = boost::edges(s.graph);
     std::size_t cut_edges = 0;
@@ -56,7 +56,7 @@ double calculate_partitioned_CR(const std::vector<std::size_t> &partitioning,
     return cut_edges / (double)s.edges;
 }
 
-CSR adjcy2CSR(const greedy::Schedule::Graph &graph) {
+CSR adjcy2CSR(const greedy::ScheduleData::Graph &graph) {
     BOOST_LOG_NAMED_SCOPE("adjcy2CSR");
     CSR res;
     std::size_t vtxs = boost::num_vertices(graph);
@@ -121,7 +121,7 @@ part_graph(CSR &csr, std::size_t num_parts, std::uint64_t ufactor,
 struct parted_proc {
     std::size_t load; ///< Sum of durations of all tasks on a processor. Does
                       ///< not take possible gaps into account
-    std::list<greedy::Schedule::Task>
+    std::list<greedy::ScheduleData::Task>
         parted_tasks; ///< List of tasks allocated on a processor.
 };
 
@@ -156,7 +156,7 @@ flatten_partition(const std::vector<parted_proc> &deep_partition,
 
 std::vector<std::size_t>
 local_partition_optimization(const std::vector<std::size_t> &partition,
-                             const greedy::Schedule &data,
+                             const greedy::ScheduleData &data,
                              const opts::base_config &conf) {
     BOOST_LOG_NAMED_SCOPE("local_partition_optimization");
     std::vector<parted_proc> proc_loads(data.proc_num);
@@ -177,8 +177,8 @@ local_partition_optimization(const std::vector<std::size_t> &partition,
 
         auto max_load_proc = std::distance(proc_loads.begin(), max_load_it);
         max_load_it->parted_tasks.sort(
-            [&data, max_load_proc](const greedy::Schedule::Task &f,
-                                   const greedy::Schedule::Task &s) {
+            [&data, max_load_proc](const greedy::ScheduleData::Task &f,
+                                   const greedy::ScheduleData::Task &s) {
                 return data.get_task_time(max_load_proc, f) >
                        data.get_task_time(max_load_proc, s);
             });
@@ -244,7 +244,7 @@ local_partition_optimization(const std::vector<std::size_t> &partition,
                         data.get_task_time(dist, task_in_question);
                     std::erase_if(
                         transfer_proc.value()->parted_tasks,
-                        [task_in_question](const greedy::Schedule::Task &cur) {
+                        [task_in_question](const greedy::ScheduleData::Task &cur) {
                             return cur == task_in_question;
                         });
                     // transfer_proc.value()->parted_tasks.remove_if(cur_dis_task);
