@@ -16,7 +16,7 @@ namespace greedy {
 Schedule::Schedule(std::vector<Edge> &edge_vec,
                    boost::numeric::ublas::matrix<std::size_t> task_times,
                    boost::numeric::ublas::matrix<int> tran_times) {
-    BOOST_LOG_NAMED_SCOPE("Input_data");
+    BOOST_LOG_NAMED_SCOPE("Schedule");
     this->task_num = task_times.size2();
     this->proc_num = tran_times.size1();
     graph = Graph(edge_vec.begin(), edge_vec.end(), task_num);

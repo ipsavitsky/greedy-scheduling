@@ -176,13 +176,6 @@ local_partition_optimization(const std::vector<std::size_t> &partition,
                              });
 
         auto max_load_proc = std::distance(proc_loads.begin(), max_load_it);
-        // std::sort(max_load_it->parted_tasks.begin(),
-        //           max_load_it->parted_tasks.end(),
-        //           [&data, max_load_proc](const Input_data::Task &f,
-        //                                  const Input_data::Task &s) {
-        //               return data.get_task_time(max_load_proc, f) >
-        //                      data.get_task_time(max_load_proc, s);
-        //           });
         max_load_it->parted_tasks.sort(
             [&data, max_load_proc](const greedy::Schedule::Task &f,
                                    const greedy::Schedule::Task &s) {
@@ -255,6 +248,9 @@ local_partition_optimization(const std::vector<std::size_t> &partition,
                             return cur == task_in_question;
                         });
                     // transfer_proc.value()->parted_tasks.remove_if(cur_dis_task);
+                    if (cur_dis_task == max_load_it->parted_tasks.end()) {
+                        break;
+                    }
                     continue;
                 }
                 break;

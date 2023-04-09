@@ -123,7 +123,7 @@ class Schedule {
     Graph graph;
 
     /**
-     * @brief Construct a new Input_data object
+     * @brief Construct a new Schedule object
      *
      * @param edge_vec Vector of all edges in a graph
      * @param task_times `task_time` matrix (\f$ C \f$)
@@ -250,7 +250,7 @@ class Schedule {
      *
      * @param D Old set of available nodes
      * @param task_to_progress Task that has just been removed from the graph.
-     * @retval std::set<Input_data::Task> Updated set of available nodes.
+     * @retval std::set<Task> Updated set of available nodes.
      */
     std::set<Task> progress_top_vertices(std::set<Task> &D,
                                          Task task_to_progress);

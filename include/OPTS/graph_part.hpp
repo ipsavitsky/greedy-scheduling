@@ -1,16 +1,16 @@
 #ifndef GRAPH_PART_HPP_
 #define GRAPH_PART_HPP_
 
-#include "OPTS/greedy/time_schedule.hpp"
 #include "OPTS/greedy/schedule.hpp"
+#include "OPTS/greedy/time_schedule.hpp"
 #include "metis.h"
 
 namespace opts {
 /**
  * @brief Compressed sparse row representation of the graph
- * 
+ *
  * It is used in METIS partitioning.
- * 
+ *
  */
 struct CSR {
     std::vector<idx_t> xadj;  ///< Adjacency indices component of the CSR
@@ -30,7 +30,7 @@ std::vector<std::size_t> get_partition(std::string filename,
                                        std::size_t num_proc);
 
 /**
- * @brief Convert an Input_data::Graph to a CSR understandable by
+ * @brief Convert an greedy::Schedule::Graph to a CSR understandable by
  * partitioning algorithms
  *
  * @param graph Graph to be converted
@@ -58,8 +58,9 @@ part_graph(CSR &csr, std::size_t num_parts, std::uint64_t ufactor,
 
 /**
  * @brief Local partition optimization algorithm
- * 
- * For heterogeneous processors this routine optimizes partition by execution time.
+ *
+ * For heterogeneous processors this routine optimizes partition by execution
+ * time.
  *
  * @param partition Unoptimized partition
  * @param data Input data object

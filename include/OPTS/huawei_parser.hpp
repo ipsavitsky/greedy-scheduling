@@ -25,7 +25,7 @@ namespace opts {
  * @throws std::runtime_error Thrown if a non-file is passed.
  * @param path Path to file
  * @param inp_class Class of input data.
- * @retval Input_data Generalised input data.
+ * @retval greedy::Schedule Generalised input data.
  */
 greedy::Schedule input_schedule_regular(std::string path,
                                   opts::input_class inp_class);
